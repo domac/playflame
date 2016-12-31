@@ -9,6 +9,7 @@ import (
 
 var printStats = flag.Bool("printStats", false, "Print stats to console")
 
+// IncCounter increments a counter.
 func IncCounter(name string, tags map[string]string, value int64) {
 	name = addTagsToName(name, tags)
 	if *printStats {
@@ -16,6 +17,7 @@ func IncCounter(name string, tags map[string]string, value int64) {
 	}
 }
 
+// UpdateGauge updates a gauge.
 func UpdateGauge(name string, tags map[string]string, value int64) {
 	name = addTagsToName(name, tags)
 	if *printStats {
@@ -23,6 +25,7 @@ func UpdateGauge(name string, tags map[string]string, value int64) {
 	}
 }
 
+// RecordTimer records a timer.
 func RecordTimer(name string, tags map[string]string, d time.Duration) {
 	name = addTagsToName(name, tags)
 	if *printStats {
@@ -31,13 +34,16 @@ func RecordTimer(name string, tags map[string]string, d time.Duration) {
 }
 
 func addTagsToName(name string, tags map[string]string) string {
-	var keyOrder []string
+	// The format we want is: host.endpoint.os.browser
+	// if there's no host tag, then we don't use it.
+	keyOrder := make([]string, 0, 4)
 	if _, ok := tags["host"]; ok {
 		keyOrder = append(keyOrder, "host")
 	}
 	keyOrder = append(keyOrder, "endpoint", "os", "browser")
 
-	parts := []string{name}
+	parts := make([]string, 1, 5)
+	parts[0] = name
 	for _, k := range keyOrder {
 		v, ok := tags[k]
 		if !ok || v == "" {
@@ -50,6 +56,8 @@ func addTagsToName(name string, tags map[string]string) string {
 	return strings.Join(parts, ".")
 }
 
+// clean takes a string that may contain special characters, and replaces these
+// characters with a '-'.
 func clean(value string) string {
 	newStr := make([]byte, len(value))
 	for i := 0; i < len(value); i++ {
