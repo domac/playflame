@@ -2,6 +2,18 @@ package stats
 
 import "testing"
 
+func BenchmarkAddTagsToName(b *testing.B) {
+	tags := map[string]string{
+		"host":     "myhost",
+		"endpoint": "hello",
+		"os":       "OS X",
+		"browser":  "Chrome",
+	}
+	for i := 0; i < b.N; i++ {
+		addTagsToName("recv.calls", tags)
+	}
+}
+
 func TestAddTagsToName(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -16,21 +28,21 @@ func TestAddTagsToName(t *testing.T) {
 		{
 			name: "recvd",
 			tags: map[string]string{
-				"endpoint": "advance",
+				"endpoint": "hello",
 				"os":       "OS X",
 				"browser":  "Chrome",
 			},
-			expected: "recvd.advance.OS-X.Chrome",
+			expected: "recvd.hello.OS-X.Chrome",
 		},
 		{
 			name: "r.call",
 			tags: map[string]string{
 				"host":     "my-host-name",
-				"endpoint": "advance",
+				"endpoint": "hello",
 				"os":       "OS{}/\tX",
 				"browser":  "Chro\\:me",
 			},
-			expected: "r.call.my-host-name.advance.OS----X.Chro--me",
+			expected: "r.call.my-host-name.hello.OS----X.Chro--me",
 		},
 	}
 
