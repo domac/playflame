@@ -15,6 +15,8 @@ func Simple(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprintln(w, "Hello VIP!")
 }
 
+var _hostName = getHost()
+
 //高级封装
 func WithAdvanced(h http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -27,6 +29,18 @@ func WithAdvanced(h http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
+func getHost() string {
+	host, err := os.Hostname()
+	if err != nil {
+		return ""
+	}
+
+	if idx := strings.IndexByte(host, '.'); idx > 0 {
+		host = host[:idx]
+	}
+	return host
+}
+
 func getStatsTags(r *http.Request) map[string]string {
 	userBrowser, userOS := parseUserAgent(r.UserAgent())
 	stats := map[string]string{
@@ -34,12 +48,8 @@ func getStatsTags(r *http.Request) map[string]string {
 		"os":       userOS,
 		"endpoint": filepath.Base(r.URL.Path),
 	}
-	host, err := os.Hostname()
-	if err == nil {
-		if idx := strings.IndexByte(host, '.'); idx > 0 {
-			host = host[:idx]
-		}
-		stats["host"] = host
+	if _hostName != "" {
+		stats["host"] = _hostName
 	}
 	return stats
 }
